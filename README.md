@@ -1,0 +1,1 @@
+# ScrapTrap-Session-Recorder-Blocker-1.0
