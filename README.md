@@ -5,7 +5,9 @@
 ![Version](https://img.shields.io/badge/Version-1.0-orange)
 
 ## Sozialinformatisches Forschungswerkzeug & Clientseitiges Schutzsystem gegen unbemerktes Session-Recording
- 
+
+![ScrapTrap Session-Recorder-Blocker](sperreein.jpg)
+
 ## 📋 Überblick
  
 Der ScrapTrap Session-Recorder-Blocker ist eine autarke, install-freie Windows-Anwendung zur systemweiten Unterbindung von Session-Recording-Diensten (z. B. Microsoft Clarity, Hotjar, Mouseflow, FullStory, Smartlook u. a.).
