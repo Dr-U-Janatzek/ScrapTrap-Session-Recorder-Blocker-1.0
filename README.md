@@ -1,5 +1,9 @@
 # ScrapTrap Session-Recorder-Blocker 1.0 (Windows Utility)
- 
+
+![Platform](https://img.shields.io/badge/Platform-Windows-blue)
+![License](https://img.shields.io/badge/License-MIT-green)
+![Version](https://img.shields.io/badge/Version-1.0-orange)
+
 ## Sozialinformatisches Forschungswerkzeug & Clientseitiges Schutzsystem gegen unbemerktes Session-Recording
  
 ## 📋 Überblick
