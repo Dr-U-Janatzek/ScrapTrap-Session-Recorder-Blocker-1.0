@@ -1,0 +1,252 @@
+$H Windows.ph
+
+' -------------------- Sinn des Programms - ANFANG ------------------------------
+' Das ScrapTrap Botabwehr und WAF Framework versteht sich als umfassendes Schutzwerk auf sozialinformatischer Grundlage. 
+' Deshalb werden bestimmte Funktionen und Module auch für allgemeine Zwecke zur Verfügung gestellt, wozu auch der Session-Recorder-Blocker 1.0 gehört – 
+' dieser wird hier als Freeware und über GitHub als Open Source Anwendung (MIT Lizenz) zur freien Verwendung angeboten. 
+' Mit Hilfe dieses Programms lässt sich verhindern, dass Session-Recording-Tools Ihre Aktivitäten auf Webseiten, die derlei Programme einsetzen, aufzeichnen – 
+' unabhängig davon, ob Sie der Verwendung von Microsoft Clarity & Co. per Consent-Banner zugestimmt haben oder nicht.
+' Wichtig: Die Sperrung gilt nur für den Rechner, auf dem das Programm ausgeführt wurde – andere Maschinen z.B. im gleichen Netzwerk bleiben davon unberührt. 
+' Somit ist eine gewisse Steuerung des Blockings über verschiedene Geräte hinweg möglich.
+' -------------------- Sinn des Programms - ENDE   ------------------------------
+
+' Deklarationen
+Declare btnBlock&, btnUnblock&, status&
+Declare hostsFile$, tmpFile$, iniFile$, line$
+Declare mode%, currentSet$
+Declare Kernel32&
+Kernel32& = UseDLL("KERNEL32.DLL")
+hostsFile$ = "C:\\Windows\\System32\\drivers\\etc\\hosts"
+tmpFile$   = "C:\\Windows\\System32\\drivers\\etc\\hosts.tmp"
+iniFile$   = "C:\\Windows\\System32\\drivers\\etc\\scraptraphost.ini"
+' Jaja, INI-Dateien mögen als veraltet gelten - für diese Zwecke allerdings sind sie immer noch hervorragend geeignet.
+
+
+' Start-Disclaimer
+Proc ShowDisclaimer
+    Declare msgText$, result%
+    msgText$ = "HAFTUNGSAUSSCHLUSS / DISCLAIMER:" + Chr$(13) + Chr$(10) + Chr$(13) + Chr$(10) + \
+               "Dieses Programm ist Open-Source-Software und verändert die Windows Hosts-Datei." + Chr$(13) + Chr$(10) + \
+               "Die Nutzung erfolgt auf eigene Gefahr. Es wird keinerlei Haftung für eventuelle " + Chr$(13) + Chr$(10) + \
+               "Systemfehler, Datenverluste oder Netzwerkeinschränkungen übernommen." + Chr$(13) + Chr$(10) + Chr$(13) + Chr$(10) + \
+               "Möchten Sie (mit Administrator-Rechten) fortfahren und diese Bedingungen akzeptieren?"
+    result% = MessageBox(msgText$, "ScrapTrap - Rechtlicher Hinweis", 36)
+    If result% <> 6
+        End
+    EndIf
+EndProc
+ShowDisclaimer
+
+
+' Fenster / GUI
+WindowTitle "ScrapTrap WAF & Botabwehr - Session-Recorder-Blocker - www.scraptrap.de"
+WindowStyle 24
+Window 100,100 - 440,260
+Create("Text", %hwnd, "Sperrt folgende Session-Recording-Tools systemweit über die Windows Hosts-Datei:", 20, 15, 380, 40)
+Create("Text", %hwnd, " - Microsoft Clarity", 20, 45, 380, 40)
+Create("Text", %hwnd, " - HotJar", 20, 60, 380, 40)
+Create("Text", %hwnd, " - Mouseflow", 20, 75, 380, 40)
+Create("Text", %hwnd, " - FullStory,", 20, 90, 380, 40)
+Create("Text", %hwnd, "sowie Lucky Orange, Smartlook, Contentsquare (ehem. Clicktale), Crazy Egg, LogRocket, Inspectlet", 20, 105, 380, 40)
+' ---- Buttons
+btnBlock&   = Create("Button", %hwnd, "Record-Tools SPERREN", 20, 150, 180, 40)
+btnUnblock& = Create("Button", %hwnd, "Sperre AUFHEBEN", 220, 150, 180, 40)
+status&     = Create("StatusWindow", %hwnd, " Bereit. Bitte als Administrator ausführen!")
+
+
+' Fenstermenü (scheinbar etwas abweichend ältere Profan-Versionen)
+PopUp "&Datei"
+  AppendMenu 101, "&Beenden"
+PopUp "&Info"
+  AppendMenu 201, "&Über ScrapTrap"
+
+
+' Initial-Buttons
+UpdateButtons
+
+
+' Hauptschleife
+While 1
+    WaitInput
+    
+    ' Beenden über das rote X
+    If %key = 2
+        Break
+    ' Menü-Auswertungen
+    ElseIf %menuitem = 101
+        Break
+    ElseIf %menuitem = 201
+        ShowAbout
+    ' Button-Auswertungen
+    ElseIf Clicked(btnBlock&)
+        ApplyBlock 1
+    ElseIf Clicked(btnUnblock&)
+        ApplyBlock 0
+    EndIf
+EndWhile
+
+FreeDLL Kernel32&
+End
+
+
+' Procs
+Proc UpdateButtons
+    currentSet$ = ReadIni$(iniFile$, "Status", "set")
+    
+    If currentSet$ = "1"
+        ' GESPERRT -> "Sperren" inaktiv, "Aufheben" aktiv
+        EnableWindow btnBlock&, 0
+        EnableWindow btnUnblock&, 1
+        SetText status&, " Status: Recording-Tools sind aktuell GESPERRT."
+    Else
+        ' NICHT GESPERRT -> "Sperren" aktiv, "Aufheben" inaktiv
+        EnableWindow btnBlock&, 1
+        EnableWindow btnUnblock&, 0
+        SetText status&, " Status: Recording-Tools sind aktuell NICHT gesperrt."
+    EndIf
+EndProc
+
+Proc ShowAbout
+    Declare aboutMsg$
+    aboutMsg$ = "ScrapTrap WAF & Botabwehr - Session-Recorder-Blocker" + Chr$(13) + Chr$(10) + \
+                "Version 1.0 (Open Source)" + Chr$(13) + Chr$(10) + Chr$(13) + Chr$(10) + \
+                "Lizenz: MIT License" + Chr$(13) + Chr$(10) + \
+                "Webseite: https://www.scraptrap.de" + Chr$(13) + Chr$(10) + \
+                "E-Mail: info@scraptrap.de" + Chr$(13) + Chr$(10) + Chr$(13) + Chr$(10) + \
+                "Dr. U. Janatzek, M.A. - FLEDISoft MemeXxa" + Chr$(13) + Chr$(10) + Chr$(13) + Chr$(10) + \
+                "" + Chr$(13) + Chr$(10) + Chr$(13) + Chr$(10) + \
+                "Systemweiter Schutz vor Clarity, Hotjar, Mouseflow, FullStory und anderen..."
+    
+    MessageBox(aboutMsg$, "Über ScrapTrap Session-Recorder-Blocker 1.0", 64)
+EndProc
+
+Proc ApplyBlock
+    Parameters pMode%
+    ' Hosts einlesen, temp. Datei schreiben
+    Assign #1, hostsFile$
+    Assign #2, tmpFile$
+    Reset #1
+    Rewrite #2
+    
+    WhileNot Eof(#1)
+        Input #1, line$
+        ' --- Erkennungszeile
+        If (InStr("clarity.ms", line$) > 0) Or \
+       (InStr("hotjar.", line$) > 0) Or \
+       (InStr("mouseflow.com", line$) > 0) Or \
+       (InStr("fullstory.com", line$) > 0) Or \
+       (InStr("smartlook.com", line$) > 0) Or \
+       (InStr("luckyorange.", line$) > 0) Or \
+       (InStr("crazyegg.com", line$) > 0) Or \
+       (InStr("contentsquare.", line$) > 0) Or \
+       (InStr("clicktale.", line$) > 0) Or \
+       (InStr("logrocket.", line$) > 0) Or \
+       (InStr("inspectlet.com", line$) > 0)
+        ' Bei Treffer überspringen
+        Else
+            Print #2, line$
+        EndIf
+    EndWhile
+    
+    ' pMode% = Domains anhängen
+    If pMode% = 1
+        ' Microsoft Clarity
+        Print #2, "0.0.0.0 clarity.ms # ScrapTrap - https://www.scraptrap.de"
+        Print #2, "0.0.0.0 www.clarity.ms # ScrapTrap - https://www.scraptrap.de"
+        Print #2, "0.0.0.0 a.clarity.ms # ScrapTrap - https://www.scraptrap.de"
+        Print #2, "0.0.0.0 b.clarity.ms # ScrapTrap - https://www.scraptrap.de"
+        Print #2, "0.0.0.0 c.clarity.ms # ScrapTrap - https://www.scraptrap.de"
+        Print #2, "0.0.0.0 k.clarity.ms # ScrapTrap - https://www.scraptrap.de"
+        Print #2, "0.0.0.0 m.clarity.ms # ScrapTrap - https://www.scraptrap.de"
+        Print #2, "0.0.0.0 v.clarity.ms # ScrapTrap - https://www.scraptrap.de"
+        
+        ' Hotjar
+        Print #2, "0.0.0.0 hotjar.com # ScrapTrap - https://www.scraptrap.de"
+        Print #2, "0.0.0.0 www.hotjar.com # ScrapTrap - https://www.scraptrap.de"
+        Print #2, "0.0.0.0 static.hotjar.com # ScrapTrap - https://www.scraptrap.de"
+        Print #2, "0.0.0.0 script.hotjar.com # ScrapTrap - https://www.scraptrap.de"
+        Print #2, "0.0.0.0 vars.hotjar.com # ScrapTrap - https://www.scraptrap.de"
+        Print #2, "0.0.0.0 in.hotjar.com # ScrapTrap - https://www.scraptrap.de"
+        Print #2, "0.0.0.0 vc.hotjar.io # ScrapTrap - https://www.scraptrap.de"
+        Print #2, "0.0.0.0 surveys.hotjar.com # ScrapTrap - https://www.scraptrap.de"
+
+        ' Mouseflow
+        Print #2, "0.0.0.0 mouseflow.com # ScrapTrap - https://www.scraptrap.de"
+        Print #2, "0.0.0.0 www.mouseflow.com # ScrapTrap - https://www.scraptrap.de"
+        Print #2, "0.0.0.0 cdn.mouseflow.com # ScrapTrap - https://www.scraptrap.de"
+        Print #2, "0.0.0.0 tools.mouseflow.com # ScrapTrap - https://www.scraptrap.de"
+
+        ' FullStory
+        Print #2, "0.0.0.0 fullstory.com # ScrapTrap - https://www.scraptrap.de"
+        Print #2, "0.0.0.0 www.fullstory.com # ScrapTrap - https://www.scraptrap.de"
+        Print #2, "0.0.0.0 edge.fullstory.com # ScrapTrap - https://www.scraptrap.de"
+        Print #2, "0.0.0.0 rs.fullstory.com # ScrapTrap - https://www.scraptrap.de"
+        Print #2, "0.0.0.0 custom.fullstory.com # ScrapTrap - https://www.scraptrap.de"
+        
+        ' Lucky Orange
+        Print #2, "0.0.0.0 luckyorange.com # ScrapTrap - https://www.scraptrap.de"
+        Print #2, "0.0.0.0 www.luckyorange.com # ScrapTrap - https://www.scraptrap.de"
+        Print #2, "0.0.0.0 cdn.luckyorange.com # ScrapTrap - https://www.scraptrap.de"
+        Print #2, "0.0.0.0 w.luckyorange.com # ScrapTrap - https://www.scraptrap.de"
+        Print #2, "0.0.0.0 upload.luckyorange.net # ScrapTrap - https://www.scraptrap.de"
+        
+        ' Smartlook
+        Print #2, "0.0.0.0 smartlook.com # ScrapTrap - https://www.scraptrap.de"
+        Print #2, "0.0.0.0 www.smartlook.com # ScrapTrap - https://www.scraptrap.de"
+        Print #2, "0.0.0.0 rec.smartlook.com # ScrapTrap - https://www.scraptrap.de"
+        Print #2, "0.0.0.0 sdk.smartlook.com # ScrapTrap - https://www.scraptrap.de"
+        
+        ' Crazy Egg
+        Print #2, "0.0.0.0 www.crazyegg.com # ScrapTrap - https://www.scraptrap.de"
+        Print #2, "0.0.0.0 script.crazyegg.com # ScrapTrap - https://www.scraptrap.de"
+        Print #2, "0.0.0.0 tracking.crazyegg.com # ScrapTrap - https://www.scraptrap.de"
+        
+        ' Contentsquare / Clicktale
+        Print #2, "0.0.0.0 contentsquare.com # ScrapTrap - https://www.scraptrap.de"
+        Print #2, "0.0.0.0 contentsquare.net # ScrapTrap - https://www.scraptrap.de"
+        Print #2, "0.0.0.0 t.contentsquare.net # ScrapTrap - https://www.scraptrap.de"
+        Print #2, "0.0.0.0 clicktale.com # ScrapTrap - https://www.scraptrap.de"
+        Print #2, "0.0.0.0 clicktale.net # ScrapTrap - https://www.scraptrap.de"
+        
+        ' LogRocket
+        Print #2, "0.0.0.0 logrocket.com # ScrapTrap - https://www.scraptrap.de"
+        Print #2, "0.0.0.0 www.logrocket.com # ScrapTrap - https://www.scraptrap.de"
+        Print #2, "0.0.0.0 cdn.logrocket.com # ScrapTrap - https://www.scraptrap.de"
+        Print #2, "0.0.0.0 r.logrocket.io # ScrapTrap - https://www.scraptrap.de"
+        
+        ' Inspectlet
+        Print #2, "0.0.0.0 www.inspectlet.com # ScrapTrap - https://www.scraptrap.de"
+        Print #2, "0.0.0.0 inspectlet.com # ScrapTrap - https://www.scraptrap.de"
+        Print #2, "0.0.0.0 cdn.inspectlet.com # ScrapTrap - https://www.scraptrap.de"
+        
+        ' Hier kann die Liste der Session-Tracker erweitert werden, falls nötig. Nicht vergessen, dann auch die Erkennungszeile zu erweitern - "If (InStr("clarity.ms", line$) > 0) Or ..."
+        ' Soll das Programm für Zielgruppen zur Verfügung gestellt werden, die selbst mit PROFAN / XProfan nicht umgehen können, die Erweiterungen aber trotzdem vornehmen sollen,
+        ' kann diese Stelle auch in eine weitere .INI ausgelagert werden, die dann über einen einfachen Texteditor geändert werden kann. 
+    EndIf
+    
+    Close #1
+    Close #2
+    
+    Copy tmpFile$ > hostsFile$
+    Erase tmpFile$
+    
+    ' Leert sofort den Windows-DNS-Cache. Sonst würde der Browser die Tracker über die alte, im Cache gespeicherte echte IP aufrufen, trotz geänderter hosts-Datei.
+    WinExec("ipconfig /flushdns", 0)
+    
+    If pMode% = 1
+        WriteIni iniFile$, "Status", "set" = "1"
+        SetText status&, "OK: Clarity & andere Session-Recorder wurden erfolgreich gesperrt!"
+        MessageBox("Die Session-Recording-Dienste wurden erfolgreich gesperrt!" + Chr$(13) + Chr$(10) + Chr$(13) + Chr$(10) + "Der DNS-Cache wurde aktualisiert.", "ScrapTrap - Sperre aktiv", 64)
+    Else
+        WriteIni iniFile$, "Status", "set" = "0"
+        SetText status&, " SUCCESS: Sperre wurde aufgehoben."
+        MessageBox("OK: Die Sperre der Session-Recording-Dienste wurde erfolgreich aufgehoben.", "ScrapTrap - Sperre aufgehoben", 64)
+    EndIf
+    
+    ' Button-Status nach der Aktion sofort aktualisieren
+    UpdateButtons
+EndProc
+
+' MIT-Lizenz
+' Dr. U. Janatzek, M.A. 10.2026
+' XProfan 11.2 
