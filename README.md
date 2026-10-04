@@ -4,7 +4,7 @@
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Version](https://img.shields.io/badge/Version-1.0-orange)
 
-## Sozialinformatisches Forschungswerkzeug & Clientseitiges Schutzsystem gegen unbemerktes Session-Recording
+## Clientseitiges, systemweites Schutzsystem gegen unbemerktes Session-Recording
 
 ![ScrapTrap Session-Recorder-Blocker](sperreein.jpg)
 
