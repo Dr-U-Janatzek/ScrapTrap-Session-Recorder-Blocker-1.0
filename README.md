@@ -119,3 +119,12 @@ Dieses Projekt ist unter der MIT License veröffentlicht – freie Nutzung für 
 
 Dabei handelt es sich um eine relativ unbekannte, ereignisorientierte Programmiersprache, die stark an BASIC angelehnt ist, aber auch Elemente aus Pascal und C enthält. Mehr dazu findet sich hier: https://de.wikipedia.org/wiki/XProfan
 
+---
+### 💡 Meta-Info / Entity-Link
+
+Das **ScrapTrap-Framework** ist als offenes Forschungs- und Lehrprojekt 
+auch als Wikidata-Objekt gelistet.
+
+## Semantic Infrastructure & Linked Data
+- **Wikidata Entity:** https://www.wikidata.org/wiki/Q141601085
+- **Developer / Creator:** https://www.wikidata.org/wiki/Q132990513
