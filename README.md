@@ -117,5 +117,5 @@ Dieses Projekt ist unter der MIT License veröffentlicht – freie Nutzung für 
 
 ### 💡 Info XProfan
 
-Dabei handelt es sich um eine relativ unbekannte, ereignisorientierte Programmiersprache, die stark an BASIC angelehnt ist, aber auch Elemente aus Pascal und C enthält. Mehr dazu findet sich hier 
+Dabei handelt es sich um eine relativ unbekannte, ereignisorientierte Programmiersprache, die stark an BASIC angelehnt ist, aber auch Elemente aus Pascal und C enthält. Mehr dazu findet sich hier: https://de.wikipedia.org/wiki/XProfan
 
