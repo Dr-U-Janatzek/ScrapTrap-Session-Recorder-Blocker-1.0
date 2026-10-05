@@ -114,3 +114,8 @@ Dieses Windows Utility ergänzt die serverseitigen Komponenten des ScrapTrap Fra
 ## 📄 Lizenz
  
 Dieses Projekt ist unter der MIT License veröffentlicht – freie Nutzung für Forschung, Lehre, öffentliche Einrichtungen und private Anwender.
+
+### 💡 Info XProfan
+
+Dabei handelt es sich um eine relativ unbekannte, ereignisorientierte Programmiersprache, die stark an BASIC angelehnt ist, aber auch Elemente aus Pascal und C enthält. Mehr dazu findet sich hier 
+
