@@ -1,5 +1,6 @@
 # ScrapTrap Session-Recorder-Blocker 1.0 (Windows Utility)
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23183174.svg)](https://doi.org/10.5281/zenodo.23183174)
 ![Platform](https://img.shields.io/badge/Platform-Windows-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Version](https://img.shields.io/badge/Version-1.0-orange)
